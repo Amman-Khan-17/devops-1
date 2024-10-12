@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager, create_access_token
 from flask_mail import Mail, Message
+from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 
 # Load environment variables from .env file
 load_dotenv()
@@ -109,3 +111,37 @@ def retrieve_password(email: str):
 
 if __name__ == '__main__':
     app.run(debug=True)  # Start the Flask application
+
+
+# Initialize extensions
+db = SQLAlchemy()
+ma = Marshmallow()
+
+# Database Models
+class User(db.Model):
+    _tablename_ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    first_name = db.Column(db.String, nullable=False)
+    last_name = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, unique=True, nullable=False)
+    password = db.Column(db.String, nullable=False)
+
+class UserSchema(ma.Schema):
+    class Meta:
+        fields = ('id', 'first_name', 'last_name', 'email', 'password')
+
+user_schema = UserSchema()
+users_schema = UserSchema(many=True)
+
+# CLI Commands
+def db_create():
+    db.create_all()
+    print("Database created.")
+
+def db_drop():
+    db.drop_all()
+    print("Database dropped.")
+
+def db_seed():
+    # Seed example data if needed
+    pass
